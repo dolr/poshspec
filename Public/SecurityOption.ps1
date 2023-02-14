@@ -127,71 +127,71 @@ function SecurityOption {
         [scriptblock]
         $Should
     )
-    function GetSecurityPolicy([string]$Category) {
+    # function GetSecurityPolicy([string]$Category) {
 
-        function Get-PolicyOptionData {
-            [OutputType([hashtable])]
-            [CmdletBinding()]
-            Param
-            (
-                [Parameter(Mandatory = $true)]
-                [Microsoft.PowerShell.DesiredStateConfiguration.ArgumentToConfigurationDataTransformation()]
-                [hashtable]
-                $FilePath
-            )
-            return $FilePath
-        }
+    #     function Get-PolicyOptionData {
+    #         [OutputType([hashtable])]
+    #         [CmdletBinding()]
+    #         Param
+    #         (
+    #             [Parameter(Mandatory = $true)]
+    #             [Microsoft.PowerShell.DesiredStateConfiguration.ArgumentToConfigurationDataTransformation()]
+    #             [hashtable]
+    #             $FilePath
+    #         )
+    #         return $FilePath
+    #     }
 
-        $securityOptionData = Get-PolicyOptionData -FilePath $("$PSScriptRoot\SecurityOptionData.psd1").Normalize()
+    #     $securityOptionData = Get-PolicyOptionData -FilePath $("$PSScriptRoot\SecurityOptionData.psd1").Normalize()
         
-        $SecurityOption = $securityOptionData[$Category]
+    #     $SecurityOption = $securityOptionData[$Category]
 
-        If ($SecurityOption) {
+    #     If ($SecurityOption) {
 
-            $SecurityPolicyFilePath = Join-Path -Path $env:temp -ChildPath 'SecurityPolicy.inf'
-            secedit.exe /export /cfg $SecurityPolicyFilePath /areas 'SECURITYPOLICY' | Out-Null
+    #         $SecurityPolicyFilePath = Join-Path -Path $env:temp -ChildPath 'SecurityPolicy.inf'
+    #         secedit.exe /export /cfg $SecurityPolicyFilePath /areas 'SECURITYPOLICY' | Out-Null
     
-            $policyConfiguration = @{ }
+    #         $policyConfiguration = @{ }
 
-            switch -regex -file $SecurityPolicyFilePath {
-                "^\[(.+)\]" {
-                    # Section
-                    $section = $matches[1]
-                    $policyConfiguration[$section] = @{ }
-                }
-                "(.+?)\s*=(.*)" {
-                    # Key
-                    $name, $value = $matches[1..2] -replace "\*"
-                    $policyConfiguration[$section][$name] = $value.Trim()
-                }
-            }
+    #         switch -regex -file $SecurityPolicyFilePath {
+    #             "^\[(.+)\]" {
+    #                 # Section
+    #                 $section = $matches[1]
+    #                 $policyConfiguration[$section] = @{ }
+    #             }
+    #             "(.+?)\s*=(.*)" {
+    #                 # Key
+    #                 $name, $value = $matches[1..2] -replace "\*"
+    #                 $policyConfiguration[$section][$name] = $value.Trim()
+    #             }
+    #         }
 
-            $soSection = $SecurityOption.Section
-            $soOptions = $SecurityOption.Option
-            $soValue = $SecurityOption.Value                
+    #         $soSection = $SecurityOption.Section
+    #         $soOptions = $SecurityOption.Option
+    #         $soValue = $SecurityOption.Value                
 
-            $soResultValue = $policyConfiguration.$soSection.$soValue
+    #         $soResultValue = $policyConfiguration.$soSection.$soValue
 
-            If ($soResultValue) {
+    #         If ($soResultValue) {
 
-                If ($soOptions.GetEnumerator().Name -ne 'String') {
-                    $soResult = ($soOptions.GetEnumerator() | Where-Object { $_.Value -eq $soResultValue }).Name
-                } 
-                Else {
-                    $soOptionsValue = ($soOptions.GetEnumerator() | Where-Object { $_.Name -eq 'String' }).Value
-                    $soResult = $soResultValue -Replace "^$soOptionsValue", ''
-                }
-            }
-            Else {
-                $soResult = $null
-            }
+    #             If ($soOptions.GetEnumerator().Name -ne 'String') {
+    #                 $soResult = ($soOptions.GetEnumerator() | Where-Object { $_.Value -eq $soResultValue }).Name
+    #             } 
+    #             Else {
+    #                 $soOptionsValue = ($soOptions.GetEnumerator() | Where-Object { $_.Name -eq 'String' }).Value
+    #                 $soResult = $soResultValue -Replace "^$soOptionsValue", ''
+    #             }
+    #         }
+    #         Else {
+    #             $soResult = $null
+    #         }
 
-            Return $soResult
-        }
-        Else {
-            Throw "The security option $Category was not found."
-        }
-    }
+    #         Return $soResult
+    #     }
+    #     Else {
+    #         Throw "The security option $Category was not found."
+    #     }
+    # }
 
     # Modify the target string to match what is in the SecurityOptionData.psd1 file
     $Category = $Target.Replace(':','').Replace(' ','_')

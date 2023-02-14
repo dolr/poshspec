@@ -104,15 +104,15 @@ function AuditPolicy {
         [Parameter(Mandatory, Position=3)]
         [scriptblock]$Should
     )
-    Function GetAuditPolicy([string]$Category,[string]$Subcategory) {
-        If (Test-RunAsAdmin){
-            auditpol /get /category:$Category |
-                Where-Object -FilterScript {$_ -match "^\s+$Subcategory"} | 
-                    ForEach-Object -Process {($_.trim() -split "\s{2,}")[1]}
-        } Else {
-            Throw "You must run as Administrator to test AuditPolicy"
-        }
-    }
+    # Function GetAuditPolicy([string]$Category,[string]$Subcategory) {
+    #     If (Test-RunAsAdmin){
+    #         auditpol /get /category:$Category |
+    #             Where-Object -FilterScript {$_ -match "^\s+$Subcategory"} | 
+    #                 ForEach-Object -Process {($_.trim() -split "\s{2,}")[1]}
+    #     } Else {
+    #         Throw "You must run as Administrator to test AuditPolicy"
+    #     }
+    # }
     $expression = {GetAuditPolicy -Category '$Qualifier' -Subcategory '$Target'}
 
     $params = Get-PoshspecParam -TestName AuditPolicy -TestExpression $expression @PSBoundParameters
